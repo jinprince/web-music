@@ -19,8 +19,17 @@ export function getNewAlbums(limit){
     return request({
         url:'/top/album',
         params:{
-            id:32311,
             limit
         }
     })
+}
+export function getTopList(idx){
+    return request({
+        url:"/top/list",
+        params:{
+            idx
+        }
+        
+    })
+
 }
