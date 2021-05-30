@@ -1,33 +1,109 @@
-import React ,{memo} from 'react';
+import React ,{memo,useCallback,useEffect,useRef,useState} from 'react';
+
 import {PlaybarWrapper,Control,PlayInfo,
-Operator} from "./style"
+Operator} from "./style";
+
+import {getSizeImage,formatDate,getPlaySong} from "@/utils/format-utils"
+import {getSongDetailAction} from "../store/actionCreators";
+// import {getSongDetsil} from "@/services/player"
 import { Slider} from 'antd';
+import { shallowEqual, useDispatch, useSelector } from 'react-redux';
+import { NavLink } from 'react-router-dom';
 export default memo(function HYAppPlayerBar(){
-  return (
+        const [currentTime, setCurrentTime] = useState(0);
+        const [progress, setProgress] = useState(0);
+        const [isChange, setIsChange] = useState(false);
+        const [isPlaying, setIsPlaying] = useState(false);
+     // hook redux
+    const {currentSong}=useSelector(state=>({
+        currentSong:state.getIn(["player","currentSong"])
+    }),shallowEqual)
+       
+        const dispatch=useDispatch()
+//  other hook
+   const audioRef=useRef();
+
+    useEffect(()=>{
+        // getSongDetsil(167876).then(res=>{
+        //     console.log(res);
+        // },[])
+        dispatch(getSongDetailAction(167876))
+    },[dispatch])
+
+    useEffect(()=>{
+        audioRef.current.src=getPlaySong(currentSong.id);
+    },[currentSong])
+
+
+    //other handle
+    const picUrl=currentSong.al && currentSong.al.picUrl;
+    const name=currentSong.ar && currentSong.ar[0].name;
+    const duration=currentSong.dt||0;
+    const playMusic=useCallback(()=>{
+        // console.log(111)
+        isPlaying?audioRef.current.pause():audioRef.current.play();
+        setIsPlaying(!isPlaying);
+    },[isPlaying])
+    const timeUpdate=(e)=>{
+        // console.log(e.target.currentTime);
+       
+        if(!isChange){
+            setCurrentTime(e.target.currentTime*1000)
+            setProgress(currentTime/duration*100)
+        }
+    }
+    const sliderChange=useCallback((value)=>{
+        // console.log(value);
+        setIsChange(true);
+        const currentTime=value/100*duration;
+        setCurrentTime(currentTime*1000);
+       setProgress(value)
+
+    },[duration])
+    const sliderAfterChange=useCallback((value)=>{
+        // console.log(value);
+        const currentTime=value/100*duration/1000;
+        audioRef.current.currentTime=currentTime;
+        setCurrentTime(currentTime*1000);
+        setIsChange(false);
+        if(!isPlaying){
+            playMusic();
+        }
+    },[duration,isPlaying,playMusic])
+
+   
+    // const progress=currentTime/duration*100;
+    
+    
+
+    return (
     <PlaybarWrapper className="sprite_player">
       <div className="content wrap-v2">
-          <Control>
+          <Control isPlaying={isPlaying}>
               <button className="sprite_player prev"></button>
-              <button className="sprite_player play"></button>
+              <button className="sprite_player play" onClick={e=>playMusic()}></button>
               <button className="sprite_player next"></button>
           </Control>
           <PlayInfo>
               <div className="image">
-                  <a href="/#">
-                      <img src="https://p1.music.126.net/EonZK7p8E2x7Szc5dRw76Q==/109951166031868739.jpg?param=34y34"/>
-                  </a>
+                  <NavLink to="/discover/player">
+                      <img src={getSizeImage(picUrl,35)} alt={currentSong.name}/>
+                  </NavLink>
               </div>
               <div className="info">
                   <div className="song">
-                      <span className="song-name">红豆</span>
-                      <span className="singer-name">要不要买菜</span>
+                      <span className="song-name">{currentSong.name}</span>
+                      <span className="singer-name">{name}</span>
                   </div>
                   <div className="progress">
-                  <Slider defaultValue={30} />
+                  <Slider defaultValue={30} value={progress}
+                  onChange={sliderChange}
+                  onAfterChange={sliderAfterChange}
+                  />
                   <div className="time">
-                      <span className="now-time">02:30</span>
+                      <span className="now-time">{formatDate(currentTime,"mm:ss")}</span>
                       <span className="divider">/</span>
-                      <span className="duration">05:30</span>
+                      <span className="duration">{formatDate(duration,"mm:ss")}</span>
                   </div>
                   </div>
               </div>
@@ -44,6 +120,7 @@ export default memo(function HYAppPlayerBar(){
               </div>
           </Operator>
       </div>
+      <audio ref={audioRef} onTimeUpdate={timeUpdate}/>
     </PlaybarWrapper     >
   )
 
