@@ -32,7 +32,8 @@ export default memo(function HYTopBanner(){
 
   },[])
   //其他业务逻辑
-  const bgImage=topBanners[currentIndex]&&topBanners[currentIndex].imageUrl+"?imageView&blur=40x20";
+  // console.log(topBanners)
+  const bgImage = topBanners[currentIndex] && (topBanners[currentIndex].imageUrl + "?imageView&blur=40x20")
   return (
     <div>
       <BannerWrapper bgImage={bgImage}>

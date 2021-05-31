@@ -5,13 +5,13 @@ export default memo(function HYPlayer(){
     <PlayerWrapper>
      <div className="content wrap-v2">
      <PlayerLeft>
-         <h2>1</h2>
-         <h2>2</h2>
+         <h2>HYPlayerInfo</h2>
+         <h2>HYSongContent</h2>
      </PlayerLeft>
      <PlayerRight>
-     <h2>3</h2>
-      <h2>4</h2>
-      <h2>5</h2>
+     <h2>HYSimiPlaylist</h2>
+      <h2>HYSimiSong</h2>
+      <h2>Download</h2>
      </PlayerRight>
      </div>
     </PlayerWrapper>
